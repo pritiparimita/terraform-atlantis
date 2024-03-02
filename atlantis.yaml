@@ -1,17 +1,25 @@
-version: 2
+version: 3
+parallel_plan: true
+parallel_apply: true
 projects:
 - name: develop
-  dir: infra/terraform/resources/example
+  dir: dev
   workspace: dev
-  workflow: terrahelp
-  apply_requirements: [mergeable, approved]
-- name: test
-  dir: infra/stage
-  workspace: stage
-  workflow: terrahelp
+  workflow: terraform
   apply_requirements: [mergeable]
+  autoplan:
+    Enabled: false
+    when_modified: ["*.tf*", "./dev/*.tf",".terraform.lock.hcl"]
+- name: test
+  dir: stage
+  workspace: stage
+  workflow: terraform
+  apply_requirements: [mergeable]
+  autoplan:
+    Enabled: true
+    when_modified: ["*.tf*", ".terraform.lock.hcl"]
 workflows:
-  terrahelp:
+  test:
     plan:
       steps:
       - init
